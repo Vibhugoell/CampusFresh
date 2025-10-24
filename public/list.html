@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/6b45e2b218.js" crossorigin="anonymous"></script>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
+    <!-- Ensure your dashboard.css contains the submission page styles -->
+    <link rel="stylesheet" href="list.css" /> 
+    <title>Submit Laundry - CampusFresh</title>
+</head>
+<body>
+    <div class="wrapper">
+        <nav class="nav">
+            <div class="nav-logo">
+                <p> CampusFresh</p>
+            </div>
+            <div class="nav-menu" id="navMenu">
+                <ul>
+                    <li><a href="dashboard.html" class="link">Dashboard</a></li>
+                    <li><a href="list.html" class="link active">Submit Order</a></li>
+                </ul>
+            </div>
+            <div class="nav-button">
+                <button class="btn logout-btn" onclick="logout()">Logout</button>
+            </div>
+            <div class="nav-menu-btn">
+                <i class="bx bx-menu" onclick="myMenuFunction()"></i>
+            </div>
+        </nav>
+
+        <div class="main-content-area submit-page">
+            <header class="page-header">
+                <h1 class="welcome-text">New Laundry Submission</h1>
+                <p class="current-hostel">Step 1: Add items to your basket.</p>
+            </header>
+            
+            <div id="messageBox" class="message" style="display:none;"></div>
+
+            <div class="submit-grid">
+                <!-- FORM CARD -->
+                <div class="card form-card">
+                    <h3 class="card-title">Add Items to Basket</h3>
+                    <form id="laundryForm">
+                        <div class="input-box">
+                            <label for="itemName">Item Category / Name</label>
+                            <input type="text" id="itemName" placeholder="e.g., T-Shirt, Bed Sheet" required />
+                        </div>
+                        <div class="input-box">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" id="quantity" placeholder="Quantity (Min 1)" required min="1" value="1" />
+                        </div>
+                        <button type="submit" class="action-btn primary-btn add-item-btn">
+                            <i class='bx bx-plus'></i> Add to List
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- SUMMARY CARD -->
+                <div class="card list-summary-card" id="itemListSection">
+                    <h3 class="card-title">Your Basket Summary</h3>
+                    <ul id="itemList" class="item-summary-list">
+                    </ul>
+                    
+                    <div class="summary-footer">
+                        <p class="total-count">Total Items: <span id="totalItemsCount">0</span></p>
+                        <button class="action-btn submit-final-btn" onclick="submitLaundry()" disabled>
+                            <i class='bx bx-check-shield'></i> Confirm & Submit Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <!-- FIX: Container wrapper ensures footer grid aligns with main content -->
+        <div class="container footer-grid">
+            <div class="footer-column brand-info">
+                <div class="logo-group">
+                    <span class="brand-name">CampusFresh</span>
+                </div>
+                <p class="tagline-footer">Laundry, done the smart way—just for your college.</p>
+                <p class="copyright">&copy; 2025 CampusFresh. All rights reserved.</p>
+            </div>
+
+            <div class="footer-column contact-info">
+                <h3>Get in Touch</h3>
+                <ul>
+                    <li>
+                        <i class="fas fa-phone-alt"></i> 
+                        Phone: <a href="tel:7947889898">7947889898</a>
+                    </li>
+                    <li>
+                        <i class="fas fa-envelope"></i> 
+                        Email: <a href="mailto:support@campusfresh.com">support@campusfresh.com</a>
+                    </li>
+                    <li>
+                        <i class="fas fa-map-marker-alt"></i> 
+                        Campus Support Office
+                    </li>
+                </ul>
+            </div>
+
+            <div class="footer-column schedule-info">
+                <h3>Pickup Schedule</h3>
+                <ul class="schedule-list">
+                    <li><span class="schedule-days">Mon & Thu:</span> PI-A, IBN-A, NGH-A</li>
+                    <li><span class="schedule-days">Tue & Fri:</span> PI-B, IBN-B, NGH-B</li>
+                    <li><span class="schedule-days">Wed & Sat:</span> PI-C, IBN-C, VASCO</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script src="list.js"></script>
+</body>
+</html>

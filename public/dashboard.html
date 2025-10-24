@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="dashboard.css" />
+  <title>CampusFresh | Dashboard</title>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- Top Navigation Bar -->
+    <nav class="nav">
+      <div class="nav-logo">
+        <p> CampusFresh</p>
+      </div>
+      <div class="nav-menu" id="navMenu">
+        <ul>
+          <li><a href="#" class="link active">Dashboard</a></li>
+          <li><a href="list.html" class="link">My Orders</a></li>
+        </ul>
+      </div>
+      <div class="nav-button">
+        <button class="btn logout-btn" onclick="logout()">Logout</button>
+      </div>
+      <div class="nav-menu-btn">
+        <i class="bx bx-menu" onclick="myMenuFunction()"></i>
+      </div>
+    </nav>
+
+    <!-- Dashboard Main Content Section -->
+    <div class="main-content-area">
+      <header class="page-header">
+        <h1 class="welcome-text">Welcome back, <span id="firstname" class="highlight-name">User</span>!</h1>
+        <p class="current-hostel">Your current hostel: IBN-C</p>
+      </header>
+
+      <div class="dashboard-grid">
+        <!-- Card 1: Quick Actions (Full width on mobile) -->
+        <div class="card quick-actions-card">
+          <div class="card-content">
+            <h3 class="card-title">Ready to submit your laundry?</h3>
+            <p>It's Mon & Thu pickup day, 3 PM – 6 PM.</p>
+          </div>
+          <div class="action-buttons">
+            <a href="list.html" class="action-btn primary-btn">+ Submit New Laundry</a>
+            <button class="action-btn secondary-btn">Raise Complaint</button>
+          </div>
+        </div>
+        
+        <div class="card status-card">
+    <div class="card-header">
+        <i class="bx bx-loader-circle status-icon" id="active-status-icon"></i> 
+        <h3 class="card-title">Active Submission Status</h3>
+    </div>
+    <p><strong>Items:</strong> <span class="data-value" id="active-items-count">--</span></p>
+    <p><strong>Status:</strong> <span class="data-status" id="active-status-text">No Active Order</span></p>
+    <p><strong>Last Updated:</strong> <span id="active-status-date">--</span></p>
+</div>
+
+<div class="card notifications-card">
+    <h3 class="card-title">Recent Updates</h3>
+    <ul class="notification-list" id="submission-history-list">
+        </ul>
+    <a href="#" class="view-all">View all notifications &rarr;</a>
+</div>
+        
+        <!-- Card 4: Hostel Schedule (Smaller, focused card) -->
+        <div class="card schedule-card">
+          <div class="card-header">
+             <i class='bx bxs-calendar-event status-icon'></i>
+             <h3 class="card-title">Next Pickup</h3>
+          </div>
+          <p class="schedule-detail"><strong>Days:</strong> Mon & Thu</p>
+          <p class="schedule-detail"><strong>Time:</strong> <span class="time-highlight">3 PM – 6 PM</span></p>
+          <p class="contact-info">Contact: +91 XXXXXXXX</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="container footer-grid">
+        <div class="footer-column brand-info">
+            <div class="logo-group">
+                <span class="brand-name">CampusFresh</span>
+            </div>
+            <p class="tagline-footer">Laundry, done the smart way—just for your college.</p>
+            <p class="copyright">&copy; 2025 CampusFresh. All rights reserved.</p>
+        </div>
+
+        <div class="footer-column contact-info">
+            <h3>Get in Touch</h3>
+            <ul>
+                <li>
+                    <i class="fas fa-phone-alt"></i> 
+                    Phone: <a href="tel:7947889898">7947889898</a>
+                </li>
+                <li>
+                    <i class="fas fa-envelope"></i> 
+                    Email: <a href="mailto:support@campusfresh.com">support@campusfresh.com</a>
+                </li>
+                <li>
+                    <i class="fas fa-map-marker-alt"></i> 
+                    Campus Support Office
+                </li>
+            </ul>
+        </div>
+
+        <div class="footer-column schedule-info">
+            <h3>Pickup Schedule</h3>
+            <ul class="schedule-list">
+                <li><span class="schedule-days">Mon & Thu:</span> PI-A, IBN-A, NGH-A</li>
+                <li><span class="schedule-days">Tue & Fri:</span> PI-B, IBN-B, NGH-B</li>
+                <li><span class="schedule-days">Wed & Sat:</span> PI-C, IBN-C, VASCO</li>
+            </ul>
+        </div>
+    </div>
+</footer>
+
+  <script>
+    // Existing JavaScript functions (logout, myMenuFunction, etc.) would go here
+    function myMenuFunction() {
+      var i = document.getElementById("navMenu");
+      var btn = document.querySelector(".nav-menu-btn i");
+      if (i.className === "nav-menu") {
+        i.className += " responsive";
+        btn.classList.remove("bx-menu");
+        btn.classList.add("bx-x");
+      } else {
+        i.className = "nav-menu";
+        btn.classList.remove("bx-x");
+        btn.classList.add("bx-menu");
+      }
+    }
+
+    function logout() {
+      // Placeholder for actual logout logic (clear tokens, redirect)
+      alert("Logging out...");
+      window.location.href = "login.html"; 
+    }
+    
+    // Set first name from local storage on load
+    document.addEventListener('DOMContentLoaded', () => {
+      const storedName = localStorage.getItem('firstname');
+      if (storedName) {
+        document.getElementById('firstname').textContent = storedName;
+      }
+    });
+  </script>
+</body>
+</html>

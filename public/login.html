@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="login.css">
+    <title>CampusFresh | Sign In</title>
+</head>
+<body>
+    <div class="wrapper">
+        <nav class="nav">
+            <div class="nav-logo">
+                <p>CampusFresh</p>
+            </div>
+            <div class="nav-button">
+                <button class="btn ghost-btn active-auth" id="loginBtn" onclick="login()">Sign In</button>
+                <button class="btn primary-btn" id="registerBtn" onclick="register()">Sign Up</button>
+            </div>
+            <div class="nav-menu-btn">
+                <i class="bx bx-menu" onclick="myMenuFunction()"></i>
+            </div>
+        </nav>
+
+        <div class="background-side">
+            <h2>CampusFresh is the smart way to laundry.</h2>
+            <p>Your college ID is all you need to get started.</p>
+        </div>
+
+        <div class="form-box-container">
+            <!-- Message box needs styling classes for error/success -->
+            <div id="messageBox" class="message" style="display:none;"></div>
+
+            <div class="form-box">
+                <div class="login-container" id="login">
+                    <div class="top-header">
+                        <header>Welcome Back!</header>
+                        <span>Don't have an account? <a href="#" onclick="register()">Sign Up</a></span>
+                    </div>
+                    <div class="input-group">
+                        <div class="input-box">
+                            <!-- FIX: Set input type to email, added ID for easier JS access -->
+                            <input type="email" class="input-field" placeholder="College Email (@chitkara.edu.in)" id="login-email-input">
+                            <i class="bx bx-user"></i>
+                        </div>
+                        <div class="input-box">
+                            <input type="password" class="input-field" placeholder="Password" id="login-password">
+                            <i class="bx bx-lock-alt" onclick="togglePassword('login-password', this)"></i>
+                        </div>
+                        <div class="two-col">
+                            <div class="one">
+                                <input type="checkbox" id="login-check">
+                                <label for="login-check"> Remember Me</label>
+                            </div>
+                            <div class="two">
+                                <a href="#">Forgot password?</a>
+                            </div>
+                        </div>
+                        <div class="input-box">
+                            <input type="button" onclick="loginUser()" class="submit-btn" value="Sign In">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="register-container" id="register">
+                    <div class="top-header">
+                        <header>Create Account</header>
+                        <span>Have an account? <a href="#" onclick="login()">Login</a></span>
+                    </div>
+                    <div class="input-group">
+                        <div class="two-forms">
+                            <div class="input-box">
+                                <input type="text" class="input-field" placeholder="Firstname" id="signup-firstname">
+                                <i class="bx bx-user"></i>
+                            </div>
+                            <div class="input-box">
+                                <input type="text" class="input-field" placeholder="Lastname" id="signup-lastname">
+                                <i class="bx bx-user"></i>
+                            </div>
+                        </div>
+                        <div class="input-box">
+                            <!-- Placeholder updated to reflect backend validation -->
+                            <input type="email" class="input-field" placeholder="College Email (@chitkara.edu.in)" id="signup-email">
+                            <i class="bx bx-envelope"></i>
+                        </div>
+                        <div class="input-box">
+                            <!-- Placeholder updated to guide user for required complexity -->
+                            <input type="password" class="input-field" placeholder="Password (Min 6, UC, Special Char)" id="signup-password">
+                            <i class="bx bx-lock-alt" onclick="togglePassword('signup-password', this)"></i>
+                        </div>
+                        <div class="input-box">
+                            <input type="password" class="input-field" placeholder="Confirm Password" id="signup-confirm-password">
+                            <i class="bx bx-lock-alt" onclick="togglePassword('signup-confirm-password', this)"></i>
+                        </div>
+                        <div class="two-col">
+                            <div class="one">
+                                <input type="checkbox" id="register-check">
+                                <label for="register-check"> I agree to the</label>
+                            </div>
+                            <div class="two">
+                                <a href="#">Terms & conditions</a>
+                            </div>
+                        </div>
+                        <div class="input-box">
+                            <input type="button" class="submit-btn" value="Register" onclick="registerUser()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Cache and Form State Variables ---
+        var loginBtn = document.getElementById("loginBtn");
+        var registerBtn = document.getElementById("registerBtn");
+        var loginForm = document.getElementById("login");
+        var registerForm = document.getElementById("register");
+        var loginEmailInput = document.getElementById("login-email-input"); // New cached input
+
+        // --- UI Helper Functions ---
+
+        /**
+         * Helper function to show messages with styling
+         * @param {string} text - Message content.
+         * @param {boolean} isError - True for error/warning, false for success.
+         */
+        function showMessage(text, isError = true) {
+            const box = document.getElementById("messageBox");
+            box.innerText = text;
+            box.className = isError ? 'message error' : 'message success'; // Apply styling classes
+            box.style.display = "block";
+            setTimeout(() => box.style.display = "none", 4000);
+        }
+
+        function hideMessage() {
+            document.getElementById("messageBox").style.display = "none";
+        }
+
+        function myMenuFunction() {
+            var i = document.getElementById("navMenu");
+            if (i.className === "nav-menu") {
+                i.className += " responsive";
+            } else {
+                i.className = "nav-menu";
+            }
+        }
+
+        function login() {
+            loginForm.style.transform = "translateX(0%)";
+            registerForm.style.transform = "translateX(100%)";
+            loginBtn.classList.add("active-auth");
+            registerBtn.classList.remove("active-auth");
+            loginForm.style.opacity = 1;
+            registerForm.style.opacity = 0;
+            hideMessage();
+        }
+
+        function register() {
+            loginForm.style.transform = "translateX(-100%)";
+            registerForm.style.transform = "translateX(0%)";
+            loginBtn.classList.remove("active-auth");
+            registerBtn.classList.add("active-auth");
+            loginForm.style.opacity = 0;
+            registerForm.style.opacity = 1;
+            hideMessage();
+        }
+
+        function togglePassword(id, icon) {
+            const field = document.getElementById(id);
+            if (field.type === "password") {
+                field.type = "text";
+                icon.classList.remove("bx-lock-alt");
+                icon.classList.add("bx-show-alt");
+            } else {
+                field.type = "password";
+                icon.classList.remove("bx-show-alt");
+                icon.classList.add("bx-lock-alt");
+            }
+        }
+
+        // --- BACKEND-COMPLIANT API CALLS ---
+
+        async function loginUser() {
+            // Read input from the correctly targeted field
+            const email = loginEmailInput.value; 
+            const password = document.querySelector('#login-password').value;
+
+            if (!email || !password) {
+                return showMessage("Email and password fields cannot be empty.", true);
+            }
+
+            const res = await fetch('/auth/login', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                
+                // CRITICAL FIX: Save Token and Email for subsequent API calls
+                localStorage.setItem("userToken", data.token);     
+                localStorage.setItem("userEmail", data.email);     
+                localStorage.setItem("firstname", data.firstname); 
+                
+                showMessage("Login successful!", false);
+                window.location.href = "/dashboard.html";
+            } else {
+                const msg = await res.text();
+                // Backend returns "Invalid Credentials" or a validation error
+                showMessage("⚠️ " + msg, true);
+            }
+        }
+
+        async function registerUser() {
+            const firstname = document.getElementById("signup-firstname");
+            const lastname = document.getElementById("signup-lastname");
+            const email = document.getElementById("signup-email");
+            const password = document.getElementById("signup-password");
+            const confirmPassword = document.getElementById("signup-confirm-password");
+
+            // Client-side password mismatch check
+            if (password.value !== confirmPassword.value) {
+                 return showMessage("Passwords do not match.", true);
+            }
+            // Check required fields (assuming all five are mandatory)
+            if (!firstname.value || !lastname.value || !email.value || !password.value || !confirmPassword.value) {
+                return showMessage("All fields are required.", true);
+            }
+
+            const res = await fetch('/auth/register', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    firstname: firstname.value,
+                    lastname: lastname.value,
+                    email: email.value,
+                    password: password.value,
+                    confirmPassword: confirmPassword.value
+                })
+            });
+
+            const msg = await res.text();
+
+            if (res.ok) {
+                // Clear inputs
+                firstname.value = "";
+                lastname.value = "";
+                email.value = "";
+                password.value = "";
+                confirmPassword.value = "";
+                
+                // Backend returns success message (201 Created)
+                showMessage("🎉 Registration successful! Please log in.", false);
+                login(); 
+            } else {
+                // Backend returns errors like "User already exists" or validation errors
+                showMessage("⚠️ " + msg, true);
+            }
+        }
+
+        // --- Initialization ---
+        window.onload = function() {
+            // Check if user has a token and redirect to dashboard if logged in
+            if (localStorage.getItem('userToken')) {
+                window.location.href = "/dashboard.html";
+            } else {
+                login(); 
+            }
+        };
+    </script>
+</body>
+</html>

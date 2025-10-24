@@ -1,0 +1,317 @@
+/* GLOBAL STYLES */
+:root {
+    --primary-color: #4CAF50; /* A fresh, college-friendly green */
+    --secondary-color: #388E3C;
+    --background-light: #f4f7f6;
+    --text-dark: #333;
+    --text-light: #555;
+    --card-bg: #fff;
+    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background-color: var(--background-light);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* HEADER & HERO SECTION */
+.hero-section {
+    background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%); /* Light, airy background */
+    padding: 30px 0 100px;
+    text-align: center;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.logo-group {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.logo {
+    font-size: 2rem;
+    margin-right: 10px;
+}
+
+.brand-name {
+    color: var(--primary-color);
+}
+
+.hero-content {
+    padding-top: 50px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.main-heading {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.1;
+}
+
+.highlight {
+    color: var(--primary-color);
+    border-bottom: 5px solid var(--primary-color);
+}
+
+.tagline {
+    font-size: 1.25rem;
+    color: var(--text-light);
+    margin-bottom: 40px;
+}
+
+/* CTA BUTTON */
+.cta-button {
+    display: inline-block;
+    padding: 15px 35px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--card-bg);
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+.cta-button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.6);
+}
+
+/* FEATURES SECTION */
+.features-section {
+    padding: 80px 0;
+    text-align: center;
+    background-color: var(--card-bg); /* White background for contrast */
+}
+
+.features-section h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 50px;
+    color: var(--text-dark);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.feature-card {
+    background-color: var(--background-light);
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+    background-color: var(--card-bg);
+    border-color: var(--primary-color);
+}
+
+.feature-icon-wrapper {
+    font-size: 2rem;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    margin: 0 auto 20px;
+    color: var(--card-bg);
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.feature-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-dark);
+}
+
+.feature-text {
+    color: var(--text-light);
+    font-size: 1rem;
+}
+
+/* --- PROFESSIONAL FOOTER STYLES --- */
+
+footer {
+    background-color: #2c3e50; /* Dark, professional background (Navy/Charcoal) */
+    color: #ecf0f1; /* Light text color for contrast */
+    padding: 40px 0;
+    font-size: 0.95rem;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr; /* Creates three columns */
+    gap: 30px;
+}
+
+.footer-column h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #ecf0f1;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 5px;
+    display: inline-block;
+}
+
+/* Brand Info Column */
+.brand-info .logo-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.brand-info .logo {
+    font-size: 1.8rem;
+    margin-right: 8px;
+}
+.brand-info .brand-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color); /* Use your brand color */
+}
+.brand-info .tagline-footer {
+    margin-bottom: 15px;
+    color: #bdc3c7;
+    font-size: 0.9rem;
+}
+.copyright {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: #7f8c8d;
+}
+
+/* Contact and Schedule Lists */
+.footer-column ul {
+    list-style: none;
+    padding: 0;
+}
+.footer-column ul li {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+.footer-column ul li i {
+    margin-right: 10px;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.footer-column ul li a {
+    color: #ecf0f1;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-column ul li a:hover {
+    color: var(--primary-color);
+}
+
+/* Schedule specific list */
+.schedule-list li {
+    display: block; /* Stack day and hostels vertically slightly */
+    margin-bottom: 8px;
+    line-height: 1.4;
+    padding-left: 0;
+}
+.schedule-list li .schedule-days {
+    font-weight: 600;
+    color: var(--primary-color);
+    display: inline-block;
+    min-width: 100px;
+}
+.schedule-list li i {
+    display: none; /* Hide icon for schedule list */
+}
+
+
+/* Mobile Responsiveness for Footer */
+@media (max-width: 768px) {
+    .footer-grid {
+        grid-template-columns: 1fr; /* Stack columns vertically on mobile */
+        text-align: center;
+    }
+
+    .footer-column {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px dashed #444; /* Separator line */
+    }
+    
+    .footer-column:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    
+    .footer-column h3 {
+        margin: 0 auto 20px auto;
+    }
+    
+    .footer-column ul li {
+        justify-content: center; /* Center list items */
+    }
+    
+    .schedule-list li {
+        text-align: left;
+    }
+    .schedule-list li .schedule-days {
+        min-width: 80px;
+    }
+}
+
+/* MEDIA QUERIES for Responsiveness */
+@media (max-width: 768px) {
+    .main-heading {
+        font-size: 2.5rem;
+    }
+
+    .tagline {
+        font-size: 1.1rem;
+    }
+
+    .features-section {
+        padding: 50px 0;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .feature-card {
+        padding: 25px;
+    }
+}

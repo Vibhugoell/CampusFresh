@@ -1,0 +1,357 @@
+/* GLOBAL STYLES & VARIABLES */
+:root {
+    --primary-color: #4CAF50; /* Fresh Campus Green */
+    --secondary-color: #388E3C;
+    --background-color: #f0f4f8; /* Light blue/gray for a clean backdrop */
+    --card-bg: #ffffff;
+    --text-dark: #333;
+    --text-light: #666;
+    --border-color: #e0e0e0;
+    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-dark);
+    line-height: 1.6;
+    height: 100vh;
+    overflow: hidden; /* Hide scrollbar for the fixed layout */
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--secondary-color);
+}
+
+/* --- MAIN WRAPPER & LAYOUT --- */
+.wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Split screen layout */
+    height: 100vh;
+    width: 100%;
+}
+
+/* --- NAVIGATION BAR --- */
+.nav {
+    position: fixed;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    background-color: var(--card-bg);
+    box-shadow: var(--shadow-light);
+    z-index: 1000;
+}
+
+.nav-logo p {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.nav-menu ul {
+    display: flex;
+    list-style: none;
+}
+
+.nav-menu ul li .link {
+    font-weight: 500;
+    margin: 0 15px;
+    color: var(--text-dark);
+    padding: 8px 0;
+    border-bottom: 2px solid transparent;
+    transition: border-bottom 0.3s ease;
+}
+
+.nav-menu ul li .link:hover,
+.nav-menu ul li .active {
+    border-bottom-color: var(--primary-color);
+}
+
+/* Navigation Buttons */
+.nav-button {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.primary-btn {
+    background: var(--primary-color);
+    color: var(--card-bg);
+}
+
+.ghost-btn {
+    background: transparent;
+    color: var(--text-dark);
+    border: 2px solid transparent;
+}
+
+.active-auth {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+}
+/* Revert button color for non-active state */
+.btn:not(.active-auth):hover {
+    background: var(--background-color);
+}
+
+
+/* --- LEFT SIDE: Promotional Background --- */
+.background-side {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--card-bg);
+    padding: 0 40px;
+}
+
+.background-side h2 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.background-side p {
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+/* --- RIGHT SIDE: Form Container --- */
+.form-box-container {
+    grid-column: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--background-color);
+    padding-top: 60px; /* Space for fixed navbar */
+    position: relative;
+    overflow: hidden; /* Important for form sliding effect */
+}
+
+/* Message Box Styling */
+.message {
+    position: absolute;
+    top: 20px;
+    width: 80%;
+    max-width: 400px;
+    text-align: center;
+    padding: 10px 15px;
+    font-weight: 600;
+    color: #155724; /* Dark Green */
+    background-color: #d4edda; /* Light Green */
+    border: 1px solid #c3e6cb;
+    border-radius: 8px;
+    z-index: 10;
+    display: none;
+    transition: opacity 0.3s ease;
+    box-shadow: var(--shadow-light);
+}
+
+
+.form-box {
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow-medium);
+    position: relative;
+    overflow: hidden; /* Hide sliding forms */
+    height: auto;
+    min-height: 500px; /* Gives consistent height */
+}
+
+/* --- FORMS: Login and Register --- */
+.login-container,
+.register-container {
+    position: absolute;
+    width: 90%; /* Allows padding inside form-box */
+    padding: 0 5%;
+    transition: all 0.6s ease-in-out;
+}
+
+/* Initial positions are handled by JS on load */
+/* .login-container starts at 0%, .register-container starts at 100% (hidden right) */
+
+
+.top-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.top-header header {
+    color: var(--text-dark);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.top-header span {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-box {
+    position: relative;
+    height: 50px;
+}
+
+.input-field {
+    width: 100%;
+    height: 100%;
+    padding: 0 45px 0 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    outline: none;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.input-field:focus {
+    border-color: var(--primary-color);
+}
+
+.input-box i {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.two-forms {
+    display: flex;
+    gap: 10px;
+}
+.two-forms .input-box {
+    width: 50%;
+}
+
+.submit-btn {
+    width: 100%;
+    height: 50px;
+    background: var(--primary-color);
+    color: var(--card-bg);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    margin-top: 15px;
+}
+
+.submit-btn:hover {
+    background: var(--secondary-color);
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+}
+
+.two-col {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-top: 10px;
+}
+.two-col label {
+    color: var(--text-light);
+}
+
+/* --- MEDIA QUERIES (RESPONSIVENESS) --- */
+
+/* Mobile view: Stacks the background and form */
+@media screen and (max-width: 850px) {
+    .wrapper {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    
+    .background-side {
+        display: none; /* Hide promotional side on small screens */
+    }
+
+    .form-box-container {
+        grid-column: 1;
+        height: 100vh;
+        padding-top: 60px;
+        overflow: hidden;
+    }
+    
+    .form-box {
+        max-width: 90%;
+    }
+
+    .nav {
+        padding: 0 20px;
+    }
+
+    .nav-button {
+        display: none; /* Hide buttons on small screen to use menu button */
+    }
+
+    .nav-menu-btn {
+        display: block;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .nav-menu {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        background: var(--card-bg);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        display: none;
+        flex-direction: column;
+        text-align: center;
+        padding: 10px 0;
+    }
+
+    .nav-menu.responsive {
+        display: flex;
+    }
+
+    .nav-menu ul {
+        flex-direction: column;
+    }
+    
+    .nav-menu ul li .link {
+        margin: 10px 0;
+    }
+}
