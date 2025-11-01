@@ -1,98 +1,131 @@
 const express = require('express');
 const router = express.Router();
+const User = require('../models/User');
+const LaundryOrder = require('../models/laundrymodel');
 
-// Adjust path as necessary
-const User = require('../models/User'); 
-const LaundryOrder = require('../models/laundryModel'); // Assumed updated name/path
-
-// Middleware to attach user object to req based on email query/body parameter
+// --- Middleware: Find user by email and attach to req ---
 const findUserByEmail = async (req, res, next) => {
-    // Get email from body (for POST) or query (for GET)
-    const email = req.body.email || req.query.email;
-    
+  try {
+    // ✅ Safely extract email from any source
+    const email =
+      (req.body && req.body.email) ||
+      (req.query && req.query.email) ||
+      (req.params && req.params.email);
+
     if (!email) {
-        // Handles the frontend error observed: "User email not found. Please log in again."
-        return res.status(400).send('User email not found. Please log in again.');
+      return res
+        .status(400)
+        .json({ message: 'User email not provided. Please log in again.' });
     }
-    
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).send('User not found in database.');
-        }
-        req.user = user; // Attach user object
-        next();
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error during user lookup.');
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found in database.' });
     }
+
+    // ✅ Attach user info to req for downstream routes
+    req.user = {
+      _id: user._id,
+      email: user.email,
+      firstname: user.firstname,
+      hostel: user.hostel,
+    };
+
+    next();
+  } catch (err) {
+    console.error('Error finding user:', err.message);
+    res.status(500).json({ message: 'Server error during user lookup.' });
+  }
 };
 
 
-// @route   POST /laundry/submit
-// @desc    Submit a new laundry order
+// --- POST: Submit a new laundry order ---
 router.post('/submit', findUserByEmail, async (req, res) => {
-    // req.user contains the user object from the middleware
-    const user = req.user; 
-    const { items } = req.body; 
-    
-    if (!items || items.length === 0) {
-        return res.status(400).send('Basket is empty. Please add items.');
+  const user = req.user;
+  const { items, hostel } = req.body;
+
+  if (!items || items.length === 0) {
+    return res.status(400).json({ message: 'Basket is empty. Please add items.' });
+  }
+
+  const finalHostel = hostel || user.hostel;
+  if (!finalHostel) {
+    return res.status(400).json({ message: 'Hostel is required.' });
+  }
+
+  try {
+    const totalItems = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+
+    const newOrder = new LaundryOrder({
+      userId: user._id,
+      userEmail: user.email,
+      items,
+      totalItems,
+      hostel: finalHostel,
+      status: 'Submitted',
+    });
+
+    await newOrder.save();
+
+    res.status(200).json({
+      message: `Order #${newOrder._id.toString().slice(-4)} submitted successfully!`,
+      order: newOrder,
+    });
+  } catch (err) {
+    console.error('Laundry submission error:', err.message);
+    if (err.name === 'ValidationError') {
+      const msgs = Object.values(err.errors).map((v) => v.message);
+      return res.status(400).json({ message: `Validation Error: ${msgs.join(', ')}` });
     }
-
-    try {
-        // Calculate total items required by the LaundryOrder schema
-        const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-
-        const newOrder = new LaundryOrder({
-            userId: user._id, // Link to User model
-            userEmail: user.email,
-            items: items,
-            totalItems: totalItems,
-            status: 'Submitted', // Default status
-            lastUpdate: Date.now()
-        });
-
-        await newOrder.save();
-        // Return a confirmation message with the order ID snippet
-        res.status(200).send(`Order #${newOrder._id.toString().slice(-4)} submitted successfully!`);
-    } catch (err) {
-        console.error("Laundry submission error:", err.message);
-        if (err.name === 'ValidationError') {
-            const errorMessages = Object.values(err.errors).map(val => val.message);
-            return res.status(400).send(`Validation Error: ${errorMessages.join(', ')}`);
-        }
-        res.status(500).send('Server Error during order submission.');
-    }
+    res.status(500).json({ message: 'Server Error during order submission.' });
+  }
 });
 
-
-// @route   GET /api/dashboard
-// @desc    Get active order and history for the logged-in user
+// --- GET: Dashboard data (active + recent) ---
 router.get('/dashboard', findUserByEmail, async (req, res) => {
-    const user = req.user; // User object attached by findUserByEmail
+  const user = req.user;
+  const selectedHostel = req.query.hostel || user.hostel;
 
-    try {
-        // Find the single active order (Submitted, In Process, Ready for Pickup)
-        const activeOrder = await LaundryOrder.findOne({
-            userId: user._id,
-            status: { $in: ['Submitted', 'In Process', 'Ready for Pickup'] }
-        }).sort({ submittedAt: -1 });
+  try {
+    // ✅ Find the most recent active order
+    const activeOrder = await LaundryOrder.findOne({
+      userId: user._id,
+      hostel: selectedHostel,
+      status: { $in: ['Submitted', 'In Process', 'Ready for Pickup'] },
+    }).sort({ createdAt: -1 });
 
-        // Find recent history (last 5 orders, regardless of final status)
-        const history = await LaundryOrder.find({
-            userId: user._id,
-        }).sort({ submittedAt: -1 }).limit(5);
+    // ✅ Fetch all completed or cancelled orders as history
+    const history = await LaundryOrder.find({
+      userId: user._id,
+      hostel: selectedHostel,
+      status: { $in: ['Delivered', 'Cancelled'] },
+    }).sort({ createdAt: -1 });
 
-        res.json({
-            activeOrder: activeOrder,
-            history: history
-        });
-
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error loading dashboard data.');
-    }
+    res.json({
+      user: {
+        firstname: user.firstname,
+        email: user.email,
+        hostel: selectedHostel,
+      },
+      activeOrder, // ✅ singular object now
+      history,
+    });
+  } catch (err) {
+    console.error('Dashboard load error:', err.message);
+    res.status(500).json({ message: 'Server error loading dashboard data.' });
+  }
 });
+// --- GET: All orders for user ---
+// router.get('/my-orders/:email', findUserByEmail, async (req, res) => {
+//   const { email } = req.params;
+//   try {
+//     const orders = await LaundryOrder.find({ userEmail: email }).sort({ submittedAt: -1 });
+//     res.json(orders);
+//   } catch (err) {
+//     console.error('Error fetching user orders:', err.message);
+//     res.status(500).json({ message: 'Error fetching laundry orders' });
+//   }
+// });
 
 module.exports = router;

@@ -10,8 +10,8 @@ const User = require('../models/User');
 const JWT_SECRET = process.env.JWT_SECRET;
 
 router.post('/register', async (req, res) => {
-    // FIX: Include lastname in destructuring, as the frontend sends it.
-    const { firstname, lastname, email, password, confirmPassword } = req.body; 
+    // Destructure required fields including hostel
+    const { firstname, lastname, email, password, confirmPassword, hostel } = req.body; 
 
     // Simple password mismatch check
     if (password !== confirmPassword) {
@@ -30,19 +30,19 @@ router.post('/register', async (req, res) => {
 
         user = new User({
             firstname,
-            lastname, // FIX: Include lastname in the user creation
+            lastname, 
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            hostel // FEATURE: Include hostel
         });
 
         await user.save();
         res.status(201).send('Registration successful!'); 
     } catch (err) {
         console.error(err.message);
-        // Handle Mongoose validation errors (e.g., password regex failed, email format failed)
+        // Handle Mongoose validation errors 
         if (err.name === 'ValidationError') {
             const errorMessages = Object.values(err.errors).map(val => val.message);
-            // Return only the first error message for a cleaner response
             return res.status(400).send(errorMessages[0]);
         }
         res.status(500).send('Server error during registration.');
@@ -59,11 +59,9 @@ router.post('/login', async (req, res) => {
 
     try {
         const user = await User.findOne({ email });
-        // Use generic message for security
         if (!user) return res.status(401).send('Invalid Credentials.'); 
 
         const isMatch = await bcrypt.compare(password, user.password);
-        // Use generic message for security
         if (!isMatch) return res.status(401).send('Invalid Credentials.'); 
 
         // Generate JWT payload
@@ -71,6 +69,7 @@ router.post('/login', async (req, res) => {
             user: {
                 id: user.id,
                 email: user.email,
+                hostel: user.hostel, // FEATURE: Add hostel to payload
             }
         };
 
@@ -85,7 +84,8 @@ router.post('/login', async (req, res) => {
                 res.status(200).json({
                     token, 
                     firstname: user.firstname,
-                    email: user.email 
+                    email: user.email, // CRITICAL: Ensure email is returned
+                    hostel: user.hostel, // FEATURE: Return hostel
                 });
             }
         );

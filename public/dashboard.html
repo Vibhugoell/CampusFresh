@@ -11,11 +11,9 @@
 </head>
 <body>
   <div class="wrapper">
-    <!-- Top Navigation Bar -->
+    <!-- Top Navigation -->
     <nav class="nav">
-      <div class="nav-logo">
-        <p> CampusFresh</p>
-      </div>
+      <div class="nav-logo"><p>CampusFresh</p></div>
       <div class="nav-menu" id="navMenu">
         <ul>
           <li><a href="#" class="link active">Dashboard</a></li>
@@ -26,127 +24,226 @@
         <button class="btn logout-btn" onclick="logout()">Logout</button>
       </div>
       <div class="nav-menu-btn">
-        <i class="bx bx-menu" onclick="myMenuFunction()"></i>
+        <i class="bx bx-menu" onclick="toggleMenu()"></i>
       </div>
     </nav>
 
-    <!-- Dashboard Main Content Section -->
+    <!-- Main Dashboard -->
     <div class="main-content-area">
       <header class="page-header">
-        <h1 class="welcome-text">Welcome back, <span id="firstname" class="highlight-name">User</span>!</h1>
-        <p class="current-hostel">Your current hostel: IBN-C</p>
+        <h1 class="welcome-text">
+          Welcome back, <span id="firstname" class="highlight-name">User</span>!
+        </h1>
+
+        <!-- Hostel Selector -->
+        <div class="hostel-selector">
+          <label for="hostelSelect"><strong>Select Hostel:</strong></label>
+          <select id="hostelSelect">
+            <option value="">-- Choose Hostel --</option>
+            <option value="PI-A">PI-A</option>
+            <option value="PI-B">PI-B</option>
+            <option value="PI-C">PI-C</option>
+            <option value="IBN-A">IBN-A</option>
+            <option value="IBN-B">IBN-B</option>
+            <option value="IBN-C">IBN-C</option>
+            <option value="NGH-A">NGH-A</option>
+            <option value="NGH-B">NGH-B</option>
+            <option value="VASCO">VASCO</option>
+          </select>
+        </div>
+
+        <p class="current-hostel">
+          Your current hostel: <span id="currentHostel">Not Selected</span>
+        </p>
       </header>
 
+      <!-- Dashboard Cards -->
       <div class="dashboard-grid">
-        <!-- Card 1: Quick Actions (Full width on mobile) -->
+        <!-- Quick Actions -->
         <div class="card quick-actions-card">
           <div class="card-content">
             <h3 class="card-title">Ready to submit your laundry?</h3>
-            <p>It's Mon & Thu pickup day, 3 PM – 6 PM.</p>
+            <p id="pickup-days-text">Please select your hostel to view pickup days.</p>
           </div>
           <div class="action-buttons">
             <a href="list.html" class="action-btn primary-btn">+ Submit New Laundry</a>
             <button class="action-btn secondary-btn">Raise Complaint</button>
           </div>
         </div>
-        
-        <div class="card status-card">
-    <div class="card-header">
-        <i class="bx bx-loader-circle status-icon" id="active-status-icon"></i> 
-        <h3 class="card-title">Active Submission Status</h3>
-    </div>
-    <p><strong>Items:</strong> <span class="data-value" id="active-items-count">--</span></p>
-    <p><strong>Status:</strong> <span class="data-status" id="active-status-text">No Active Order</span></p>
-    <p><strong>Last Updated:</strong> <span id="active-status-date">--</span></p>
-</div>
 
-<div class="card notifications-card">
-    <h3 class="card-title">Recent Updates</h3>
-    <ul class="notification-list" id="submission-history-list">
-        </ul>
-    <a href="#" class="view-all">View all notifications &rarr;</a>
-</div>
-        
-        <!-- Card 4: Hostel Schedule (Smaller, focused card) -->
+        <!-- Active Laundry Status -->
+        <div class="card status-card">
+          <div class="card-header">
+            <i class="bx bx-loader-circle status-icon"></i> 
+            <h3 class="card-title">Active Submission Status</h3>
+          </div>
+          <p><strong>Items:</strong> <span id="active-items-count">--</span></p>
+          <p><strong>Status:</strong> <span id="active-status-text">--</span></p>
+          <p><strong>Last Updated:</strong> <span id="active-status-date">--</span></p>
+        </div>
+
+        <!-- Recent Updates -->
+        <div class="card notifications-card">
+          <h3 class="card-title">Recent Updates</h3>
+          <ul id="submission-history-list" class="notification-list"></ul>
+          <a href="#" class="view-all">View all notifications &rarr;</a>
+        </div>
+
+        <!-- Pickup Schedule -->
         <div class="card schedule-card">
           <div class="card-header">
-             <i class='bx bxs-calendar-event status-icon'></i>
-             <h3 class="card-title">Next Pickup</h3>
+            <i class='bx bxs-calendar-event status-icon'></i>
+            <h3 class="card-title">Next Pickup</h3>
           </div>
-          <p class="schedule-detail"><strong>Days:</strong> Mon & Thu</p>
+          <p class="schedule-detail"><strong>Days:</strong> <span id="schedule-days">--</span></p>
           <p class="schedule-detail"><strong>Time:</strong> <span class="time-highlight">3 PM – 6 PM</span></p>
           <p class="contact-info">Contact: +91 XXXXXXXX</p>
         </div>
-
       </div>
     </div>
   </div>
+
+  <!-- Footer -->
   <footer>
     <div class="container footer-grid">
-        <div class="footer-column brand-info">
-            <div class="logo-group">
-                <span class="brand-name">CampusFresh</span>
-            </div>
-            <p class="tagline-footer">Laundry, done the smart way—just for your college.</p>
-            <p class="copyright">&copy; 2025 CampusFresh. All rights reserved.</p>
-        </div>
+      <div class="footer-column brand-info">
+        <div class="logo-group"><span class="brand-name">CampusFresh</span></div>
+        <p class="tagline-footer">Laundry, done the smart way—just for your college.</p>
+        <p class="copyright">&copy; 2025 CampusFresh. All rights reserved.</p>
+      </div>
 
-        <div class="footer-column contact-info">
-            <h3>Get in Touch</h3>
-            <ul>
-                <li>
-                    <i class="fas fa-phone-alt"></i> 
-                    Phone: <a href="tel:7947889898">7947889898</a>
-                </li>
-                <li>
-                    <i class="fas fa-envelope"></i> 
-                    Email: <a href="mailto:support@campusfresh.com">support@campusfresh.com</a>
-                </li>
-                <li>
-                    <i class="fas fa-map-marker-alt"></i> 
-                    Campus Support Office
-                </li>
-            </ul>
-        </div>
+      <div class="footer-column contact-info">
+        <h3>Get in Touch</h3>
+        <ul>
+          <li><i class="fas fa-phone-alt"></i> Phone: <a href="tel:7947889898">7947889898</a></li>
+          <li><i class="fas fa-envelope"></i> Email: <a href="mailto:support@campusfresh.com">support@campusfresh.com</a></li>
+          <li><i class="fas fa-map-marker-alt"></i> Campus Support Office</li>
+        </ul>
+      </div>
 
-        <div class="footer-column schedule-info">
-            <h3>Pickup Schedule</h3>
-            <ul class="schedule-list">
-                <li><span class="schedule-days">Mon & Thu:</span> PI-A, IBN-A, NGH-A</li>
-                <li><span class="schedule-days">Tue & Fri:</span> PI-B, IBN-B, NGH-B</li>
-                <li><span class="schedule-days">Wed & Sat:</span> PI-C, IBN-C, VASCO</li>
-            </ul>
-        </div>
+      <div class="footer-column schedule-info">
+        <h3>Pickup Schedule</h3>
+        <ul class="schedule-list">
+          <li><span class="schedule-days">Mon & Thu:</span> PI-A, IBN-A, NGH-A</li>
+          <li><span class="schedule-days">Tue & Fri:</span> PI-B, IBN-B, NGH-B</li>
+          <li><span class="schedule-days">Wed & Sat:</span> PI-C, IBN-C, VASCO</li>
+        </ul>
+      </div>
     </div>
-</footer>
+  </footer>
 
+  <!-- Scripts -->
   <script>
-    // Existing JavaScript functions (logout, myMenuFunction, etc.) would go here
-    function myMenuFunction() {
-      var i = document.getElementById("navMenu");
-      var btn = document.querySelector(".nav-menu-btn i");
-      if (i.className === "nav-menu") {
-        i.className += " responsive";
-        btn.classList.remove("bx-menu");
-        btn.classList.add("bx-x");
-      } else {
-        i.className = "nav-menu";
-        btn.classList.remove("bx-x");
-        btn.classList.add("bx-menu");
-      }
+    const hostelDays = {
+      "PI-A": "Mon & Thu", "IBN-A": "Mon & Thu", "NGH-A": "Mon & Thu",
+      "PI-B": "Tue & Fri", "IBN-B": "Tue & Fri", "NGH-B": "Tue & Fri",
+      "PI-C": "Wed & Sat", "IBN-C": "Wed & Sat", "VASCO": "Wed & Sat"
+    };
+
+    function toggleMenu() {
+      const menu = document.getElementById("navMenu");
+      const icon = document.querySelector(".nav-menu-btn i");
+      const isOpen = menu.classList.toggle("responsive");
+      icon.className = isOpen ? "bx bx-x" : "bx bx-menu";
     }
 
     function logout() {
-      // Placeholder for actual logout logic (clear tokens, redirect)
+      localStorage.clear();
       alert("Logging out...");
-      window.location.href = "login.html"; 
+      window.location.href = "login.html";
     }
-    
-    // Set first name from local storage on load
-    document.addEventListener('DOMContentLoaded', () => {
-      const storedName = localStorage.getItem('firstname');
-      if (storedName) {
-        document.getElementById('firstname').textContent = storedName;
+
+    function updateSchedule(hostel) {
+      const days = hostelDays[hostel] || "--";
+      document.getElementById("schedule-days").textContent = days;
+      document.getElementById("pickup-days-text").textContent =
+        days !== "--"
+          ? `Laundry pickup for ${hostel} is on ${days}, 3 PM – 6 PM.`
+          : "Please select your hostel.";
+    }
+
+    // ✅ Load Dashboard with Latest Active + Full History
+    async function loadDashboard(email) {
+      try {
+        const res = await fetch(`/laundry/dashboard?email=${encodeURIComponent(email)}`);
+        const data = await res.json();
+        if (!data) return;
+
+        // --- ACTIVE ORDER ---
+        const active = data.orders?.find(o => o.status.toLowerCase() === "active" || o.status.toLowerCase() === "processing");
+        if (active) {
+          document.getElementById("active-items-count").textContent = active.totalItems;
+          document.getElementById("active-status-text").textContent = active.status;
+          document.getElementById("active-status-date").textContent = new Date(active.lastUpdate).toLocaleString();
+        } else {
+          document.getElementById("active-items-count").textContent = "--";
+          document.getElementById("active-status-text").textContent = "No Active Order";
+          document.getElementById("active-status-date").textContent = "--";
+        }
+
+        // --- HISTORY LIST ---
+        const list = document.getElementById("submission-history-list");
+        list.innerHTML = "";
+        if (data.orders && data.orders.length > 0) {
+          // Sort by date (newest first)
+          data.orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          data.orders.forEach(order => {
+            const li = document.createElement("li");
+            li.textContent = `${new Date(order.createdAt).toLocaleDateString()} - ${order.status} (${order.totalItems} items)`;
+            list.appendChild(li);
+          });
+        } else {
+          const li = document.createElement("li");
+          li.textContent = "No laundry submissions yet.";
+          list.appendChild(li);
+        }
+
+        // --- USER + HOSTEL INFO ---
+        if (data.user?.hostel) {
+          const hostel = data.user.hostel;
+          document.getElementById("currentHostel").textContent = hostel;
+          document.getElementById("hostelSelect").value = hostel;
+          localStorage.setItem("hostel", hostel);
+          updateSchedule(hostel);
+        }
+
+      } catch (err) {
+        console.error("Dashboard load failed:", err);
+      }
+    }
+
+    // ✅ Auto-load on Page Ready
+    document.addEventListener("DOMContentLoaded", () => {
+      const name = localStorage.getItem("firstname");
+      const email = localStorage.getItem("email");
+      const hostel = localStorage.getItem("hostel");
+
+      if (name) document.getElementById("firstname").textContent = name;
+      if (hostel) {
+        document.getElementById("currentHostel").textContent = hostel;
+        document.getElementById("hostelSelect").value = hostel;
+        updateSchedule(hostel);
+      }
+      if (email) loadDashboard(email);
+    });
+
+    // ✅ Update Hostel + Refresh Dashboard
+    document.getElementById("hostelSelect").addEventListener("change", async (e) => {
+      const selected = e.target.value;
+      if (!selected) return;
+
+      localStorage.setItem("hostel", selected);
+      document.getElementById("currentHostel").textContent = selected;
+      updateSchedule(selected);
+
+      const email = localStorage.getItem("email");
+      if (email) {
+        await fetch("/laundry/updateHostel", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, hostel: selected })
+        });
+        loadDashboard(email);
       }
     });
   </script>
