@@ -67,7 +67,7 @@
           </div>
           <div class="action-buttons">
             <a href="list.html" class="action-btn primary-btn">+ Submit New Laundry</a>
-            <button class="action-btn secondary-btn">Raise Complaint</button>
+            <button class="action-btn secondary-btn raise-btn" id="raiseComplaintBtn">Raise Complaint</button>
           </div>
         </div>
 
@@ -84,9 +84,9 @@
 
         <!-- Recent Updates -->
         <div class="card notifications-card">
-          <h3 class="card-title">Recent Updates</h3>
+          <h3 class="card-title">History</h3>
           <ul id="submission-history-list" class="notification-list"></ul>
-          <a href="#" class="view-all">View all notifications &rarr;</a>
+          <a href="#" class="view-all">View all →</a>
         </div>
 
         <!-- Pickup Schedule -->
@@ -102,6 +102,20 @@
       </div>
     </div>
   </div>
+  <!-- Complaint Modal -->
+  <!-- Complaint Modal -->
+<div id="complaintModal" class="modal">
+  <div class="modal-content">
+    <span id="closeModal" class="close">&times;</span>
+    <h2>Raise a Complaint</h2>
+    <form id="complaintForm">
+      <input type="text" id="complaintSubject" placeholder="Enter Subject" required>
+      <textarea id="complaintMessage" placeholder="Describe your issue..." required></textarea>
+      <button type="submit" class="submit-btn">Submit Complaint</button>
+    </form>
+  </div>
+</div>
+
 
   <!-- Footer -->
   <footer>
@@ -115,137 +129,293 @@
       <div class="footer-column contact-info">
         <h3>Get in Touch</h3>
         <ul>
-          <li><i class="fas fa-phone-alt"></i> Phone: <a href="tel:7947889898">7947889898</a></li>
-          <li><i class="fas fa-envelope"></i> Email: <a href="mailto:support@campusfresh.com">support@campusfresh.com</a></li>
-          <li><i class="fas fa-map-marker-alt"></i> Campus Support Office</li>
+          <li>Phone: <a href="tel:7947889898">7947889898</a></li>
+          <li>Email: <a href="mailto:support@campusfresh.com">support@campusfresh.com</a></li>
+          <li>Campus Support Office</li>
         </ul>
       </div>
 
       <div class="footer-column schedule-info">
         <h3>Pickup Schedule</h3>
         <ul class="schedule-list">
-          <li><span class="schedule-days">Mon & Thu:</span> PI-A, IBN-A, NGH-A</li>
-          <li><span class="schedule-days">Tue & Fri:</span> PI-B, IBN-B, NGH-B</li>
-          <li><span class="schedule-days">Wed & Sat:</span> PI-C, IBN-C, VASCO</li>
+          <li><span>Mon & Thu:</span> PI-A, IBN-A, NGH-A</li>
+          <li><span>Tue & Fri:</span> PI-B, IBN-B, NGH-B</li>
+          <li><span>Wed & Sat:</span> PI-C, IBN-C, VASCO</li>
         </ul>
       </div>
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <script>
-    const hostelDays = {
-      "PI-A": "Mon & Thu", "IBN-A": "Mon & Thu", "NGH-A": "Mon & Thu",
-      "PI-B": "Tue & Fri", "IBN-B": "Tue & Fri", "NGH-B": "Tue & Fri",
-      "PI-C": "Wed & Sat", "IBN-C": "Wed & Sat", "VASCO": "Wed & Sat"
-    };
+  <!-- Script -->
+<script>
+const hostelDays = {
+  "PI-A": "Mon & Thu",
+  "IBN-A": "Mon & Thu",
+  "NGH-A": "Mon & Thu",
+  "PI-B": "Tue & Fri",
+  "IBN-B": "Tue & Fri",
+  "NGH-B": "Tue & Fri",
+  "PI-C": "Wed & Sat",
+  "IBN-C": "Wed & Sat",
+  "VASCO": "Wed & Sat"
+};
 
-    function toggleMenu() {
-      const menu = document.getElementById("navMenu");
-      const icon = document.querySelector(".nav-menu-btn i");
-      const isOpen = menu.classList.toggle("responsive");
-      icon.className = isOpen ? "bx bx-x" : "bx bx-menu";
-    }
+function toggleMenu() {
+  const menu = document.getElementById("navMenu");
+  const icon = document.querySelector(".nav-menu-btn i");
+  const isOpen = menu.classList.toggle("responsive");
+  icon.className = isOpen ? "bx bx-x" : "bx bx-menu";
+}
 
-    function logout() {
-      localStorage.clear();
-      alert("Logging out...");
+function logout() {
+  localStorage.clear();
+  alert("Logging out...");
+  window.location.href = "login.html";
+}
+
+function updateSchedule(hostel) {
+  const days = hostelDays[hostel] || "--";
+  document.getElementById("schedule-days").textContent = days;
+  document.getElementById("pickup-days-text").textContent =
+    days !== "--"
+      ? `Laundry pickup for ${hostel} is on ${days}, 3 PM – 6 PM.`
+      : "Please select your hostel.";
+}
+
+// ✅ Load dashboard data
+async function loadDashboard(email) {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Session expired, please log in again.");
       window.location.href = "login.html";
+      return;
     }
 
-    function updateSchedule(hostel) {
-      const days = hostelDays[hostel] || "--";
-      document.getElementById("schedule-days").textContent = days;
-      document.getElementById("pickup-days-text").textContent =
-        days !== "--"
-          ? `Laundry pickup for ${hostel} is on ${days}, 3 PM – 6 PM.`
-          : "Please select your hostel.";
-    }
-
-    // ✅ Load Dashboard with Latest Active + Full History
-    async function loadDashboard(email) {
-      try {
-        const res = await fetch(`/laundry/dashboard?email=${encodeURIComponent(email)}`);
-        const data = await res.json();
-        if (!data) return;
-
-        // --- ACTIVE ORDER ---
-        const active = data.orders?.find(o => o.status.toLowerCase() === "active" || o.status.toLowerCase() === "processing");
-        if (active) {
-          document.getElementById("active-items-count").textContent = active.totalItems;
-          document.getElementById("active-status-text").textContent = active.status;
-          document.getElementById("active-status-date").textContent = new Date(active.lastUpdate).toLocaleString();
-        } else {
-          document.getElementById("active-items-count").textContent = "--";
-          document.getElementById("active-status-text").textContent = "No Active Order";
-          document.getElementById("active-status-date").textContent = "--";
-        }
-
-        // --- HISTORY LIST ---
-        const list = document.getElementById("submission-history-list");
-        list.innerHTML = "";
-        if (data.orders && data.orders.length > 0) {
-          // Sort by date (newest first)
-          data.orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          data.orders.forEach(order => {
-            const li = document.createElement("li");
-            li.textContent = `${new Date(order.createdAt).toLocaleDateString()} - ${order.status} (${order.totalItems} items)`;
-            list.appendChild(li);
-          });
-        } else {
-          const li = document.createElement("li");
-          li.textContent = "No laundry submissions yet.";
-          list.appendChild(li);
-        }
-
-        // --- USER + HOSTEL INFO ---
-        if (data.user?.hostel) {
-          const hostel = data.user.hostel;
-          document.getElementById("currentHostel").textContent = hostel;
-          document.getElementById("hostelSelect").value = hostel;
-          localStorage.setItem("hostel", hostel);
-          updateSchedule(hostel);
-        }
-
-      } catch (err) {
-        console.error("Dashboard load failed:", err);
-      }
-    }
-
-    // ✅ Auto-load on Page Ready
-    document.addEventListener("DOMContentLoaded", () => {
-      const name = localStorage.getItem("firstname");
-      const email = localStorage.getItem("email");
-      const hostel = localStorage.getItem("hostel");
-
-      if (name) document.getElementById("firstname").textContent = name;
-      if (hostel) {
-        document.getElementById("currentHostel").textContent = hostel;
-        document.getElementById("hostelSelect").value = hostel;
-        updateSchedule(hostel);
-      }
-      if (email) loadDashboard(email);
+    const res = await fetch(`/laundry/dashboard?email=${encodeURIComponent(email)}`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
 
-    // ✅ Update Hostel + Refresh Dashboard
-    document.getElementById("hostelSelect").addEventListener("change", async (e) => {
-      const selected = e.target.value;
-      if (!selected) return;
+    if (!res.ok) {
+      console.error("Dashboard fetch failed:", res.status);
+      return;
+    }
 
-      localStorage.setItem("hostel", selected);
-      document.getElementById("currentHostel").textContent = selected;
-      updateSchedule(selected);
+    const data = await res.json();
+    const { user, activeOrder, history } = data;
 
-      const email = localStorage.getItem("email");
-      if (email) {
-        await fetch("/laundry/updateHostel", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, hostel: selected })
-        });
-        loadDashboard(email);
-      }
+    document.getElementById("firstname").textContent = user.firstname || "User";
+    document.getElementById("currentHostel").textContent = user.hostel || "Not Selected";
+    document.getElementById("hostelSelect").value = user.hostel || "";
+    localStorage.setItem("hostel", user.hostel || "");
+    updateSchedule(user.hostel);
+
+    const activeItems = activeOrder?.totalItems || (activeOrder?.items?.length ?? 0);
+    document.getElementById("active-items-count").textContent = activeItems || "--";
+    document.getElementById("active-status-text").textContent =
+      activeOrder?.status || "No Active Order";
+    document.getElementById("active-status-date").textContent =
+      activeOrder?.createdAt ? new Date(activeOrder.createdAt).toLocaleString() : "--";
+
+    const historyList = document.getElementById("submission-history-list");
+    historyList.innerHTML = "";
+    if (history && history.length > 0) {
+      history.slice(0, 5).forEach(order => {
+        const date = new Date(order.createdAt).toLocaleDateString();
+        const li = document.createElement("li");
+        li.textContent = `${date} - ${order.status} (${order.totalItems} items)`;
+        historyList.appendChild(li);
+      });
+    } else {
+      const li = document.createElement("li");
+      li.textContent = "No previous laundry submissions found.";
+      historyList.appendChild(li);
+    }
+  } catch (err) {
+    console.error("Dashboard load failed:", err);
+  }
+}
+
+// ✅ Handle hostel change
+document.getElementById("hostelSelect").addEventListener("change", async (e) => {
+  const selected = e.target.value;
+  if (!selected) return;
+
+  const email = localStorage.getItem("userEmail");
+  const token = localStorage.getItem("token");
+
+  if (!email || !token) {
+    alert("Please log in again.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  localStorage.setItem("hostel", selected);
+  document.getElementById("currentHostel").textContent = selected;
+  updateSchedule(selected);
+
+  try {
+    const res = await fetch("/laundry/updateHostel", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ email, hostel: selected }),
     });
-  </script>
+
+    if (res.ok) {
+      console.log("✅ Hostel updated successfully");
+      loadDashboard(email);
+    } else {
+      console.error("❌ Failed to update hostel:", res.status);
+    }
+  } catch (err) {
+    console.error("Error updating hostel:", err);
+  }
+});
+
+// ✅ View all history
+document.querySelector(".view-all").addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  const token = localStorage.getItem("token");
+  const email = localStorage.getItem("userEmail");
+  if (!token || !email) {
+    alert("Login required.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const historyList = document.getElementById("submission-history-list");
+  historyList.innerHTML = "<li>Loading all orders...</li>";
+
+  try {
+    const res = await fetch(`/laundry/my-orders/${encodeURIComponent(email)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    const orders = data.history || [];
+    historyList.innerHTML = "";
+
+    if (orders.length === 0) {
+      historyList.innerHTML = "<li>No orders found.</li>";
+      return;
+    }
+
+    orders.forEach(order => {
+      const date = new Date(order.createdAt).toLocaleString();
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <h4>🧺 ${date}</h4>
+        <p>Status: <strong>${order.status}</strong></p>
+        <p>Hostel: ${order.hostel}</p>
+        <p>Total Items: ${order.totalItems}</p>
+        <ul>${(order.items || []).map(i => `<li>${i.name} — ${i.quantity}</li>`).join('')}</ul>
+        <hr/>
+      `;
+      historyList.appendChild(li);
+    });
+
+    document.querySelector(".view-all").style.display = "none";
+  } catch (err) {
+    console.error("Error loading orders:", err);
+    historyList.innerHTML = "<li>Error loading orders. Try again later.</li>";
+  }
+});
+
+// ✅ On DOM load
+window.addEventListener("DOMContentLoaded", () => {
+  const name = localStorage.getItem("firstname");
+  const email = localStorage.getItem("userEmail");
+  const hostel = localStorage.getItem("hostel");
+
+  if (!email) {
+    alert("Login required.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  if (name) document.getElementById("firstname").textContent = name;
+  if (hostel) {
+    document.getElementById("currentHostel").textContent = hostel;
+    document.getElementById("hostelSelect").value = hostel;
+    updateSchedule(hostel);
+  }
+
+  loadDashboard(email);
+});
+
+// ==========================
+// ✅ COMPLAINT POPUP SECTION
+// ==========================
+
+const raiseComplaintBtn = document.getElementById("raiseComplaintBtn");
+const complaintModal = document.getElementById("complaintModal");
+const closeModal = document.getElementById("closeModal");
+const complaintForm = document.getElementById("complaintForm");
+
+// Open modal
+raiseComplaintBtn.addEventListener("click", () => {
+  complaintModal.style.display = "flex";
+  complaintModal.classList.add("fade-in");
+  document.body.style.overflow = "hidden";
+});
+
+// Close modal
+closeModal.addEventListener("click", closeComplaintModal);
+window.addEventListener("click", (e) => {
+  if (e.target === complaintModal) closeComplaintModal();
+});
+
+function closeComplaintModal() {
+  complaintModal.classList.remove("fade-in");
+  complaintModal.classList.add("fade-out");
+  setTimeout(() => {
+    complaintModal.style.display = "none";
+    complaintModal.classList.remove("fade-out");
+    document.body.style.overflow = "auto";
+  }, 250);
+}
+
+// ✅ Complaint form submission
+complaintForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const token = localStorage.getItem("token");
+  const email = localStorage.getItem("userEmail");
+  const subject = document.getElementById("complaintSubject").value.trim();
+  const message = document.getElementById("complaintMessage").value.trim();
+
+  if (!subject || !message) return alert("⚠️ Please fill in all fields.");
+
+  try {
+    const res = await fetch("http://localhost:2000/complaints/raise", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ email, subject, message }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert("✅ Complaint submitted successfully!");
+      complaintForm.reset();
+      closeComplaintModal();
+    } else {
+      alert(`❌ ${data.message || "Failed to submit complaint."}`);
+    }
+  } catch (error) {
+    alert("🚨 Server error. Please try again later.");
+    console.error("Complaint Error:", error);
+  }
+});
+
+</script>
+
+
 </body>
 </html>

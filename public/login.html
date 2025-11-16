@@ -112,165 +112,137 @@
         </div>
     </div>
 
-    <script>
-        // --- DOM Cache and Form State Variables ---
-        var loginBtn = document.getElementById("loginBtn");
-        var registerBtn = document.getElementById("registerBtn");
-        var loginForm = document.getElementById("login");
-        var registerForm = document.getElementById("register");
-        var loginEmailInput = document.getElementById("login-email-input"); // New cached input
+   <script>
+    // --- DOM Cache ---
+    const loginBtn = document.getElementById("loginBtn");
+    const registerBtn = document.getElementById("registerBtn");
+    const loginForm = document.getElementById("login");
+    const registerForm = document.getElementById("register");
+    const messageBox = document.getElementById("messageBox");
 
-        // --- UI Helper Functions ---
+    // --- Utility Functions ---
+    function showMessage(text, isError = true) {
+        messageBox.textContent = text;
+        messageBox.className = isError ? "message error" : "message success";
+        messageBox.style.display = "block";
+        setTimeout(() => (messageBox.style.display = "none"), 4000);
+    }
 
-        /**
-         * Helper function to show messages with styling
-         * @param {string} text - Message content.
-         * @param {boolean} isError - True for error/warning, false for success.
-         */
-        function showMessage(text, isError = true) {
-            const box = document.getElementById("messageBox");
-            box.innerText = text;
-            box.className = isError ? 'message error' : 'message success'; // Apply styling classes
-            box.style.display = "block";
-            setTimeout(() => box.style.display = "none", 4000);
+    function hideMessage() {
+        messageBox.style.display = "none";
+    }
+
+    function togglePassword(id, icon) {
+        const field = document.getElementById(id);
+        if (field.type === "password") {
+            field.type = "text";
+            icon.classList.replace("bx-lock-alt", "bx-show-alt");
+        } else {
+            field.type = "password";
+            icon.classList.replace("bx-show-alt", "bx-lock-alt");
         }
+    }
 
-        function hideMessage() {
-            document.getElementById("messageBox").style.display = "none";
+    // --- Form Switching ---
+    function login() {
+        loginForm.style.transform = "translateX(0%)";
+        registerForm.style.transform = "translateX(100%)";
+        loginBtn.classList.add("active-auth");
+        registerBtn.classList.remove("active-auth");
+        hideMessage();
+    }
+
+    function register() {
+        loginForm.style.transform = "translateX(-100%)";
+        registerForm.style.transform = "translateX(0%)";
+        loginBtn.classList.remove("active-auth");
+        registerBtn.classList.add("active-auth");
+        hideMessage();
+    }
+
+  // --- API: LOGIN ---
+async function loginUser() {
+    const email = document.getElementById("login-email-input").value.trim();
+    const password = document.getElementById("login-password").value.trim();
+
+    if (!email || !password) return showMessage("Please fill in all fields.", true);
+    if (!email.endsWith("@chitkara.edu.in")) return showMessage("Please use your college email.", true);
+
+    try {
+        const res = await fetch("/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            // ✅ Safely extract fields
+            const userEmail = data.email || data.user?.email;
+            const firstname = data.firstname || data.user?.firstname;
+
+            if (!userEmail) return showMessage("⚠️ Email missing in server response.", true);
+
+            // ✅ Save login info
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("userEmail", userEmail);
+            localStorage.setItem("firstname", firstname);
+
+            showMessage("✅ Login successful! Redirecting...", false);
+            setTimeout(() => (window.location.href = "/dashboard.html"), 1000);
+        } else {
+            showMessage("⚠️ " + (data.message || "Invalid credentials."), true);
         }
+    } catch (err) {
+        showMessage("⚠️ Server unreachable. Try again later.", true);
+    }
+}
 
-        function myMenuFunction() {
-            var i = document.getElementById("navMenu");
-            if (i.className === "nav-menu") {
-                i.className += " responsive";
-            } else {
-                i.className = "nav-menu";
-            }
+// --- API: REGISTER ---
+async function registerUser() {
+    const firstname = document.getElementById("signup-firstname").value.trim();
+    const lastname = document.getElementById("signup-lastname").value.trim();
+    const email = document.getElementById("signup-email").value.trim();
+    const password = document.getElementById("signup-password").value.trim();
+    const confirmPassword = document.getElementById("signup-confirm-password").value.trim();
+
+    if (!firstname || !lastname || !email || !password || !confirmPassword)
+        return showMessage("All fields are required.", true);
+
+    if (!email.endsWith("@chitkara.edu.in"))
+        return showMessage("Please use your college email.", true);
+
+    if (password !== confirmPassword)
+        return showMessage("Passwords do not match.", true);
+
+    try {
+        const res = await fetch("/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ firstname, lastname, email, password }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            showMessage("🎉 Registration successful! Please log in.", false);
+            setTimeout(login, 1000);
+        } else {
+            showMessage("⚠️ " + (data.message || "Registration failed."), true);
         }
+    } catch (err) {
+        showMessage("⚠️ Server unreachable. Try again later.", true);
+    }
+}
 
-        function login() {
-            loginForm.style.transform = "translateX(0%)";
-            registerForm.style.transform = "translateX(100%)";
-            loginBtn.classList.add("active-auth");
-            registerBtn.classList.remove("active-auth");
-            loginForm.style.opacity = 1;
-            registerForm.style.opacity = 0;
-            hideMessage();
-        }
+    // --- Auto Redirect if Logged In ---
+    window.onload = () => {
+        const token = localStorage.getItem("token");
+        if (token) window.location.href = "/dashboard.html";
+        else login();
+    };
+</script>
 
-        function register() {
-            loginForm.style.transform = "translateX(-100%)";
-            registerForm.style.transform = "translateX(0%)";
-            loginBtn.classList.remove("active-auth");
-            registerBtn.classList.add("active-auth");
-            loginForm.style.opacity = 0;
-            registerForm.style.opacity = 1;
-            hideMessage();
-        }
-
-        function togglePassword(id, icon) {
-            const field = document.getElementById(id);
-            if (field.type === "password") {
-                field.type = "text";
-                icon.classList.remove("bx-lock-alt");
-                icon.classList.add("bx-show-alt");
-            } else {
-                field.type = "password";
-                icon.classList.remove("bx-show-alt");
-                icon.classList.add("bx-lock-alt");
-            }
-        }
-
-        // --- BACKEND-COMPLIANT API CALLS ---
-
-        async function loginUser() {
-            // Read input from the correctly targeted field
-            const email = loginEmailInput.value; 
-            const password = document.querySelector('#login-password').value;
-
-            if (!email || !password) {
-                return showMessage("Email and password fields cannot be empty.", true);
-            }
-
-            const res = await fetch('/auth/login', {
-                method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                
-                // CRITICAL FIX: Save Token and Email for subsequent API calls
-                localStorage.setItem("userToken", data.token);     
-                localStorage.setItem("userEmail", data.email);     
-                localStorage.setItem("firstname", data.firstname); 
-                
-                showMessage("Login successful!", false);
-                window.location.href = "/dashboard.html";
-            } else {
-                const msg = await res.text();
-                // Backend returns "Invalid Credentials" or a validation error
-                showMessage("⚠️ " + msg, true);
-            }
-        }
-
-        async function registerUser() {
-            const firstname = document.getElementById("signup-firstname");
-            const lastname = document.getElementById("signup-lastname");
-            const email = document.getElementById("signup-email");
-            const password = document.getElementById("signup-password");
-            const confirmPassword = document.getElementById("signup-confirm-password");
-
-            // Client-side password mismatch check
-            if (password.value !== confirmPassword.value) {
-                 return showMessage("Passwords do not match.", true);
-            }
-            // Check required fields (assuming all five are mandatory)
-            if (!firstname.value || !lastname.value || !email.value || !password.value || !confirmPassword.value) {
-                return showMessage("All fields are required.", true);
-            }
-
-            const res = await fetch('/auth/register', {
-                method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    firstname: firstname.value,
-                    lastname: lastname.value,
-                    email: email.value,
-                    password: password.value,
-                    confirmPassword: confirmPassword.value
-                })
-            });
-
-            const msg = await res.text();
-
-            if (res.ok) {
-                // Clear inputs
-                firstname.value = "";
-                lastname.value = "";
-                email.value = "";
-                password.value = "";
-                confirmPassword.value = "";
-                
-                // Backend returns success message (201 Created)
-                showMessage("🎉 Registration successful! Please log in.", false);
-                login(); 
-            } else {
-                // Backend returns errors like "User already exists" or validation errors
-                showMessage("⚠️ " + msg, true);
-            }
-        }
-
-        // --- Initialization ---
-        window.onload = function() {
-            // Check if user has a token and redirect to dashboard if logged in
-            if (localStorage.getItem('userToken')) {
-                window.location.href = "/dashboard.html";
-            } else {
-                login(); 
-            }
-        };
-    </script>
 </body>
 </html>

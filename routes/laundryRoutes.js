@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const LaundryOrder = require('../models/laundrymodel');
+const auth = require('./auth'); // adjust path if different
 
 // --- Middleware: Find user by email and attach to req ---
 const findUserByEmail = async (req, res, next) => {
@@ -13,7 +14,7 @@ const findUserByEmail = async (req, res, next) => {
       (req.params && req.params.email);
 
     if (!email) {
-      return res
+       return res
         .status(400)
         .json({ message: 'User email not provided. Please log in again.' });
     }
@@ -82,25 +83,35 @@ router.post('/submit', findUserByEmail, async (req, res) => {
   }
 });
 
-// --- GET: Dashboard data (active + recent) ---
+// --- GET: Dashboard data (active + recent history) ---
 router.get('/dashboard', findUserByEmail, async (req, res) => {
   const user = req.user;
   const selectedHostel = req.query.hostel || user.hostel;
 
+  if (!selectedHostel) {
+    return res.json({
+      user: {
+        firstname: user.firstname,
+        email: user.email,
+        hostel: null,
+      },
+      activeOrder: null,
+      history: [],
+    });
+  }
+
   try {
-    // ✅ Find the most recent active order
-    const activeOrder = await LaundryOrder.findOne({
-      userId: user._id,
+    const allOrders = await LaundryOrder.find({
+      $or: [
+        { userId: user._id },
+        { userEmail: user.email }
+      ],
       hostel: selectedHostel,
-      status: { $in: ['Submitted', 'In Process', 'Ready for Pickup'] },
     }).sort({ createdAt: -1 });
 
-    // ✅ Fetch all completed or cancelled orders as history
-    const history = await LaundryOrder.find({
-      userId: user._id,
-      hostel: selectedHostel,
-      status: { $in: ['Delivered', 'Cancelled'] },
-    }).sort({ createdAt: -1 });
+    const activeStatuses = ['Submitted', 'In Process', 'Ready for Pickup'];
+    const activeOrder = allOrders.find(o => activeStatuses.includes(o.status)) || null;
+    const history = allOrders.filter(o => !activeStatuses.includes(o.status));
 
     res.json({
       user: {
@@ -108,7 +119,7 @@ router.get('/dashboard', findUserByEmail, async (req, res) => {
         email: user.email,
         hostel: selectedHostel,
       },
-      activeOrder, // ✅ singular object now
+      activeOrder,
       history,
     });
   } catch (err) {
@@ -116,16 +127,58 @@ router.get('/dashboard', findUserByEmail, async (req, res) => {
     res.status(500).json({ message: 'Server error loading dashboard data.' });
   }
 });
-// --- GET: All orders for user ---
-// router.get('/my-orders/:email', findUserByEmail, async (req, res) => {
-//   const { email } = req.params;
-//   try {
-//     const orders = await LaundryOrder.find({ userEmail: email }).sort({ submittedAt: -1 });
-//     res.json(orders);
-//   } catch (err) {
-//     console.error('Error fetching user orders:', err.message);
-//     res.status(500).json({ message: 'Error fetching laundry orders' });
-//   }
-// });
+
+
+// --- GET: All orders for user (Used for 'My Orders' tab/page) ---
+router.get('/my-orders/:email', findUserByEmail, async (req, res) => {
+  const { email } = req.params;
+  try {
+    // Fetches ALL orders across ALL hostels for the user
+    const orders = await LaundryOrder.find({ userEmail: email }).sort({ submittedAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    console.error('Error fetching user orders:', err.message);
+    res.status(500).json({ message: 'Error fetching laundry orders' });
+  }
+});
+// GET: Protected - fetch all orders for logged-in user (no email param)
+router.get('/history', findUserByEmail, async (req, res) => {
+  try {
+    const userEmail = req.user.email;
+    const orders = await LaundryOrder.find({ userEmail }).sort({ createdAt: -1 });
+    return res.status(200).json({ history: orders });
+  } catch (err) {
+    console.error('Error fetching history:', err.message);
+    return res.status(500).json({ message: 'Server error' });
+  }
+});
+router.post("/updateHostel", findUserByEmail, async (req, res) => {
+  try {
+    const { hostel } = req.body;
+    const userEmail = req.user.email;
+
+    if (!hostel) {
+      return res.status(400).json({ message: "Hostel name required" });
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { email: userEmail },
+      { hostel },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "Hostel updated successfully!",
+      hostel: updatedUser.hostel,
+    });
+  } catch (err) {
+    console.error("Error updating hostel:", err.message);
+    res.status(500).json({ message: "Server error while updating hostel" });
+  }
+});
 
 module.exports = router;

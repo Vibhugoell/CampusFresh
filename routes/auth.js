@@ -2,98 +2,90 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-// Adjust path as necessary if your models folder is not one level up
-const User = require('../models/User'); 
+const JWT_SECRET = process.env.JWT_SECRET || 'defaultsecret'; // fallback for local dev
 
-// Ensure JWT_SECRET is loaded from your environment variables in server.js
-const JWT_SECRET = process.env.JWT_SECRET;
-
+// ✅ REGISTER ROUTE
 router.post('/register', async (req, res) => {
-    // Destructure required fields including hostel
-    const { firstname, lastname, email, password, confirmPassword, hostel } = req.body; 
+  const { firstname, lastname, email, password, confirmPassword, hostel } = req.body;
 
-    // Simple password mismatch check
-    if (password !== confirmPassword) {
-        return res.status(400).send('Passwords do not match.');
-    }
+  // 1️⃣ Basic validations
+  if (!firstname || !lastname || !email || !password)
+    return res.status(400).json({ message: 'All fields are required.' });
 
-    try {
-        let user = await User.findOne({ email });
-        if (user) {
-            return res.status(409).send('User already exists.');
-        }
+  if (!email.endsWith('@chitkara.edu.in'))
+    return res.status(400).json({ message: 'Please use your college email.' });
 
-        // Hash password before saving
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+  if (password !== confirmPassword)
+    return res.status(400).json({ message: 'Passwords do not match.' });
 
-        user = new User({
-            firstname,
-            lastname, 
-            email,
-            password: hashedPassword,
-            hostel // FEATURE: Include hostel
-        });
+  try {
+    let existingUser = await User.findOne({ email });
+    if (existingUser)
+      return res.status(409).json({ message: 'User already exists.' });
 
-        await user.save();
-        res.status(201).send('Registration successful!'); 
-    } catch (err) {
-        console.error(err.message);
-        // Handle Mongoose validation errors 
-        if (err.name === 'ValidationError') {
-            const errorMessages = Object.values(err.errors).map(val => val.message);
-            return res.status(400).send(errorMessages[0]);
-        }
-        res.status(500).send('Server error during registration.');
-    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const user = new User({
+      firstname,
+      lastname,
+      email,
+      password: hashedPassword,
+      hostel,
+    });
+
+    await user.save();
+    res.status(201).json({ message: '🎉 Registration successful!' });
+  } catch (err) {
+    console.error('Registration error:', err.message);
+    res.status(500).json({ message: 'Server error during registration.' });
+  }
 });
 
+
+// ✅ LOGIN ROUTE
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    // Basic input check
-    if (!email || !password) {
-        return res.status(400).send("Email and password are required.");
-    }
+  if (!email || !password)
+    return res.status(400).json({ message: 'Email and password are required.' });
 
-    try {
-        const user = await User.findOne({ email });
-        if (!user) return res.status(401).send('Invalid Credentials.'); 
+  try {
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(401).json({ message: 'Invalid credentials.' });
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(401).send('Invalid Credentials.'); 
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch)
+      return res.status(401).json({ message: 'Invalid credentials.' });
 
-        // Generate JWT payload
-        const payload = {
-            user: {
-                id: user.id,
-                email: user.email,
-                hostel: user.hostel, // FEATURE: Add hostel to payload
-            }
-        };
+    // ✅ Create JWT payload
+    const payload = {
+      user: {
+        id: user.id,
+        email: user.email,
+        hostel: user.hostel,
+      },
+    };
 
-        // Sign the token
-        jwt.sign(
-            payload,
-            JWT_SECRET,
-            { expiresIn: '1h' }, 
-            (err, token) => {
-                if (err) throw err;
-                
-                res.status(200).json({
-                    token, 
-                    firstname: user.firstname,
-                    email: user.email, // CRITICAL: Ensure email is returned
-                    hostel: user.hostel, // FEATURE: Return hostel
-                });
-            }
-        );
+    // ✅ Sign and return token with user details
+    jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
+      if (err) throw err;
 
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error during login.');
-    }
+      return res.status(200).json({
+        message: 'Login successful!',
+        token,
+        email: user.email,
+        firstname: user.firstname,
+        hostel: user.hostel,
+      });
+    });
+  } catch (err) {
+    console.error('Login error:', err.message);
+    res.status(500).json({ message: 'Server error during login.' });
+  }
 });
 
 module.exports = router;
