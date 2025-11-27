@@ -88,6 +88,12 @@
           <ul id="submission-history-list" class="notification-list"></ul>
           <a href="#" class="view-all">View all →</a>
         </div>
+        <!-- Complaint History -->
+        <div class="card complaints-card">
+          <h3 class="card-title">Complaint History</h3>
+          <ul id="complaint-history-list" class="complaint-list"></ul>
+          <a href="#" id="viewAllComplaints" class="view-all">View all →</a>
+        </div>
 
         <!-- Pickup Schedule -->
         <div class="card schedule-card">
@@ -97,17 +103,16 @@
           </div>
           <p class="schedule-detail"><strong>Days:</strong> <span id="schedule-days">--</span></p>
           <p class="schedule-detail"><strong>Time:</strong> <span class="time-highlight">3 PM – 6 PM</span></p>
-          <p class="contact-info">Contact: +91 XXXXXXXX</p>
+          <p class="contact-info"><strong>Contact: </strong>+91 9592092069</p>
         </div>
       </div>
     </div>
   </div>
   <!-- Complaint Modal -->
-  <!-- Complaint Modal -->
 <div id="complaintModal" class="modal">
   <div class="modal-content">
     <span id="closeModal" class="close">&times;</span>
-    <h2>Raise a Complaint</h2>
+    <h2>Your Complaint</h2>
     <form id="complaintForm">
       <input type="text" id="complaintSubject" placeholder="Enter Subject" required>
       <textarea id="complaintMessage" placeholder="Describe your issue..." required></textarea>
@@ -129,7 +134,7 @@
       <div class="footer-column contact-info">
         <h3>Get in Touch</h3>
         <ul>
-          <li>Phone: <a href="tel:7947889898">7947889898</a></li>
+          <li>Phone: <a href="tel:7947889898">9592092069</a></li>
           <li>Email: <a href="mailto:support@campusfresh.com">support@campusfresh.com</a></li>
           <li>Campus Support Office</li>
         </ul>
@@ -292,7 +297,7 @@ document.querySelector(".view-all").addEventListener("click", async (e) => {
 
   try {
     const res = await fetch(`/laundry/my-orders/${encodeURIComponent(email)}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}` }
     });
 
     const data = await res.json();
@@ -308,13 +313,19 @@ document.querySelector(".view-all").addEventListener("click", async (e) => {
       const date = new Date(order.createdAt).toLocaleString();
       const li = document.createElement("li");
       li.innerHTML = `
-        <h4>🧺 ${date}</h4>
-        <p>Status: <strong>${order.status}</strong></p>
-        <p>Hostel: ${order.hostel}</p>
-        <p>Total Items: ${order.totalItems}</p>
-        <ul>${(order.items || []).map(i => `<li>${i.name} — ${i.quantity}</li>`).join('')}</ul>
-        <hr/>
-      `;
+      <h4>${date}</h4>
+      <p><strong>Status:</strong> ${order.status}</p>
+      <p><strong>Hostel:</strong> ${order.hostel}</p>
+      <p><strong>Total Items:</strong> ${order.totalItems}</p>
+
+      <div class="items-row">
+        ${(order.items || [])
+          .map(i => `<span class="item-chip">${i.name} — ${i.quantity} , </span>`)
+          .join('')}
+      </div>
+
+      <hr/>
+    `;
       historyList.appendChild(li);
     });
 
@@ -345,12 +356,14 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   loadDashboard(email);
+  loadComplaints(email);
 });
 
 // ==========================
-// ✅ COMPLAINT POPUP SECTION
+// ✅ COMPLAINT POPUP + HISTORY
 // ==========================
 
+// Elements
 const raiseComplaintBtn = document.getElementById("raiseComplaintBtn");
 const complaintModal = document.getElementById("complaintModal");
 const closeModal = document.getElementById("closeModal");
@@ -359,7 +372,6 @@ const complaintForm = document.getElementById("complaintForm");
 // Open modal
 raiseComplaintBtn.addEventListener("click", () => {
   complaintModal.style.display = "flex";
-  complaintModal.classList.add("fade-in");
   document.body.style.overflow = "hidden";
 });
 
@@ -370,17 +382,14 @@ window.addEventListener("click", (e) => {
 });
 
 function closeComplaintModal() {
-  complaintModal.classList.remove("fade-in");
-  complaintModal.classList.add("fade-out");
-  setTimeout(() => {
-    complaintModal.style.display = "none";
-    complaintModal.classList.remove("fade-out");
-    document.body.style.overflow = "auto";
-  }, 250);
+  complaintModal.style.display = "none";
+  document.body.style.overflow = "auto";
 }
 
-// ✅ Complaint form submission
-complaintForm.addEventListener("submit", async (e) => {
+// ==========================
+// ✅ SUBMIT NEW COMPLAINT
+// ==========================
+document.getElementById("complaintForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const token = localStorage.getItem("token");
@@ -388,29 +397,109 @@ complaintForm.addEventListener("submit", async (e) => {
   const subject = document.getElementById("complaintSubject").value.trim();
   const message = document.getElementById("complaintMessage").value.trim();
 
-  if (!subject || !message) return alert("⚠️ Please fill in all fields.");
-
   try {
-    const res = await fetch("http://localhost:2000/complaints/raise", {
+    const res = await fetch("/complaints/raise", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify({ email, subject, message }),
+      body: JSON.stringify({
+        email,        // 🔥 REQUIRED BY BACKEND
+        subject,
+        message,
+      }),
     });
 
     const data = await res.json();
-    if (res.ok) {
-      alert("✅ Complaint submitted successfully!");
-      complaintForm.reset();
-      closeComplaintModal();
-    } else {
-      alert(`❌ ${data.message || "Failed to submit complaint."}`);
+    if(!res.ok)return alert(data.message);
+    alert("Complaint submitted successfully!");
+    loadComplaints(email);   // 🔥 refresh
+
+  } catch (err) {
+    console.error("Submit complaint error:", err);
+  }
+});
+
+// ==========================
+// ✅ LOAD COMPLAINT HISTORY
+// ==========================
+async function loadComplaints(email) {
+  if (!email) return;
+
+  const list = document.getElementById("complaint-history-list");
+  list.innerHTML = "<li>Loading...</li>";
+
+  try {
+    const res = await fetch(`/complaints/my/${email}`);
+    const data = await res.json();
+
+    const complaints = data.your || [];
+    list.innerHTML = "";
+
+    if (complaints.length === 0) {
+      list.innerHTML = "<li>No complaints found.</li>";
+      return;
     }
-  } catch (error) {
-    alert("🚨 Server error. Please try again later.");
-    console.error("Complaint Error:", error);
+
+    complaints.slice(0, 5).forEach((c) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <p>Subject:</strong> ${c.message}</p>
+        <p>Status:</strong> ${c.status}</p>
+        <hr/>
+      `;
+      list.appendChild(li);
+    });
+
+  } catch (err) {
+    console.error("Complaint history error:", err);
+    list.innerHTML = "<li>Error loading complaints.</li>";
+  }
+}
+
+// ==========================
+// ✅ VIEW ALL COMPLAINTS
+// ==========================
+document.getElementById("viewAllComplaints").addEventListener("click", async (e) => {
+  e.preventDefault();
+  
+  const token = localStorage.getItem("token");
+  const email = localStorage.getItem("userEmail");
+  const list = document.getElementById("complaint-history-list");
+  list.innerHTML = "<li>Loading...</li>";
+
+  try {
+    const res = await fetch(`/complaints/my/${encodeURIComponent(email)}`,{
+      headers:{Authorization: `Bearer ${token}`}
+    });
+    const data = await res.json();
+
+    const complaints = data.your || [];
+    list.innerHTML = "";
+
+    if (complaints.length === 0) {
+      list.innerHTML = "<li>No complaints found.</li>";
+      return;
+    }
+
+    complaints.forEach((c) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <h4>${new Date(c.createdAt).toLocaleString()}</h4>
+        <p><strong>Subject:</strong> ${c.subject}</p>
+        <p><strong>Status:</strong> ${c.status}</p>
+        <p><strong>Message:</strong> ${c.message}</p>
+        <hr/>
+      `;
+      list.appendChild(li);
+    });
+
+    document.getElementById("viewAllComplaints").style.display = "none";
+
+  } catch (err) {
+    console.error("Error fetching all complaints:", err);
+    list.innerHTML = "<li>Error loading complaints.</li>";
   }
 });
 

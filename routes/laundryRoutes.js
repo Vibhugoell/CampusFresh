@@ -9,30 +9,28 @@ const findUserByEmail = async (req, res, next) => {
   try {
     // ✅ Safely extract email from any source
     const email =
-      (req.body && req.body.email) ||
-      (req.query && req.query.email) ||
-      (req.params && req.params.email);
+    (req.params && req.params.email) ||  // ALWAYS PRIORITY
+    (req.body && req.body.email) ||
+    (req.query && req.query.email);
 
     if (!email) {
        return res
         .status(400)
-        .json({ message: 'User email not provided. Please log in again.' });
+        .json({ message: 'User email not provided.' });
     }
-
     const user = await User.findOne({ email: email.toLowerCase().trim() });
-
     if (!user) {
-      return res.status(404).json({ message: 'User not found in database.' });
+      return res.status(404).json({ message: 'User not found' });
     }
-
     // ✅ Attach user info to req for downstream routes
+    req.user=user;
     req.user = {
       _id: user._id,
       email: user.email,
       firstname: user.firstname,
       hostel: user.hostel,
     };
-
+    
     next();
   } catch (err) {
     console.error('Error finding user:', err.message);
@@ -129,18 +127,21 @@ router.get('/dashboard', findUserByEmail, async (req, res) => {
 });
 
 
-// --- GET: All orders for user (Used for 'My Orders' tab/page) ---
 router.get('/my-orders/:email', findUserByEmail, async (req, res) => {
-  const { email } = req.params;
   try {
-    // Fetches ALL orders across ALL hostels for the user
-    const orders = await LaundryOrder.find({ userEmail: email }).sort({ submittedAt: -1 });
-    res.json(orders);
+    const email = req.params.email.toLowerCase().trim();
+
+    console.log("📌 Fetching orders for:", email);
+
+    const orders = await LaundryOrder.find({ userEmail: email }).sort({ createdAt: -1 });
+
+    res.json({ history: orders });
   } catch (err) {
-    console.error('Error fetching user orders:', err.message);
+    console.error('Error fetching user orders:', err);
     res.status(500).json({ message: 'Error fetching laundry orders' });
   }
 });
+
 // GET: Protected - fetch all orders for logged-in user (no email param)
 router.get('/history', findUserByEmail, async (req, res) => {
   try {

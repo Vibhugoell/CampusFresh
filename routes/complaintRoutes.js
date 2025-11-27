@@ -1,57 +1,74 @@
 const express = require("express");
 const Complaint = require("../models/complaint");
 const User = require("../models/User");
-const auth = require("./auth");
+const auth = require("./auth");  // ✅ token middleware
 const router = express.Router();
 
-// ✅ Middleware: Fetch logged-in user from token
+/* ----------------------------------------------------
+   ✅ Middleware: Extract logged-in user using JWT + fetch details
+---------------------------------------------------- */
 const findUser = async (req, res, next) => {
-  const email = req.body.email || req.query.email || req.user?.email;
+  try {
+   const email =
+    (req.params && req.params.email) ||  // ALWAYS PRIORITY
+    (req.body && req.body.email) ||
+    (req.query && req.query.email);
 
-  if (!email) return res.status(401).json({ message: "Login required" });
+    if (!email) return res.status(401).json({ message: "Email missing" });
 
-  const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ message: "User not found" });
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-  req.user = user;
-  next();
+    req.user = user;
+    req.user = {
+      _id: user._id,
+      email: user.email,
+      firstname: user.firstname,
+      hostel: user.hostel,
+    };
+    next();
+  } catch (err) {
+    console.log("findUser error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 
-// ✅ Submit complaint
-router.post("/raise", findUser, async (req, res) => {
-  try {
-    const { message, orderId } = req.body;
-
-    if (!message) return res.status(400).json({ message: "Complaint required" });
-
-    const complaint = new Complaint({
-      userId: req.user._id,
-      userEmail: req.user.email,
-      message,
-      orderId: orderId || null,
-      status: "Submitted",
+/* ----------------------------------------------------
+   ✅ Submit Complaint
+---------------------------------------------------- */
+router.post("/raise", auth, findUser, async (req, res) => { 
+  try { 
+    const { subject, message, orderId } = req.body; 
+    if (!message) { 
+      return res.status(400).json({ message: "Complaint message required" }); } 
+    const complaint = new Complaint({ 
+      userId: req.user._id, 
+      userEmail: req.user.email, 
+      subject: subject || "No Subject", 
+      message, orderId: orderId || null, 
+      status: "Submitted", }); 
+    await complaint.save(); 
+    res.status(201).json({ message: "Complaint submitted successfully!", complaint }); }
+    catch (err) { console.error("Error submitting complaint:", err); 
+      res.status(500).json({ message: "Server error" }); } 
     });
-
-    await complaint.save();
-    res.status(201).json({ message: "Complaint submitted successfully!", complaint });
-
-  } catch (err) {
-    console.error("Error submitting complaint:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// ✅ Get complaints for logged-in user
-router.get("/my", findUser, async (req, res) => {
+/* ----------------------------------------------------
+   ✅ Get All Complaints of Logged-in User
+---------------------------------------------------- */
+router.get("/my/:email", auth,findUser, async (req, res) => {
   try {
+    const email=req.params.email.toLowerCase().trim();
+    console.log("📌 Fetching complaints for:", email);
+
     const complaints = await Complaint.find({
-      userEmail: req.user.email,
+      userEmail: email
     }).sort({ createdAt: -1 });
 
-    res.json({ complaints });
+    res.json({ your: complaints });
   } catch (err) {
-    res.status(500).json({ message: "Error loading complaints" });
-  }
+    console.error('Error fetching user orders:', err);
+    res.status(500).json({ message: 'Error fetching laundry orders' });  }
 });
+
 
 module.exports = router;
