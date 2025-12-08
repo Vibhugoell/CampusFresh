@@ -1,0 +1,114 @@
+/* ===========================
+   PAGE LAYOUT
+=========================== */
+.complaints-page {
+  padding: 40px;
+  max-width: 900px;
+  margin: auto;
+  font-family: "Poppins", sans-serif;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.loading {
+  font-size: 18px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* ===========================
+   GRID LAYOUT
+=========================== */
+.complaints-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+/* ===========================
+   COMPLAINT CARD
+=========================== */
+.complaint-card {
+  background: #ffffff;
+  padding: 20px 25px;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: 0.2s ease-in-out;
+  border-left: 6px solid #ff5959;
+}
+
+.complaint-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+.complaint-msg,
+.email,
+.message {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* ===========================
+   STATUS BADGES
+=========================== */
+.badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+  margin-left: 8px;
+}
+
+.badge.pending {
+  background: #ffe49d;
+  color: #805a00;
+}
+
+.badge.in-review {
+  background: #bcdcff;
+  color: #003c73;
+}
+
+.badge.resolved {
+  background: #b2ffb8;
+  color: #005917;
+}
+
+.badge.dismissed {
+  background: #ffb7b7;
+  color: #850000;
+}
+
+/* ===========================
+   STATUS SELECT DROPDOWN
+=========================== */
+.status-select {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 14px;
+  background: #f9f9f9;
+  transition: 0.2s ease;
+}
+
+.status-select:hover {
+  border-color: #666;
+}

@@ -1,0 +1,126 @@
+/* =========================== */
+/* MAIN PAGE STYLE */
+/* =========================== */
+.laundry-page {
+  padding: 30px;
+  color: #1f2937;
+  font-family: "Poppins", sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #eef2ff, #f4f4ff);
+}
+
+/* Page Title */
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1d4ed8;
+  margin-bottom: 25px;
+}
+
+/* =========================== */
+/* HEADER - FILTERS ROW */
+/* =========================== */
+.header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.search-box,
+.status-filter {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: white;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.search-box:focus,
+.status-filter:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0px 0px 5px rgba(59, 130, 246, 0.4);
+}
+
+/* =========================== */
+/* GRID OF ORDERS */
+/* =========================== */
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
+}
+
+/* =========================== */
+/* CARD STYLE */
+/* =========================== */
+.order-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 5px solid #3b82f6;
+}
+
+.order-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+
+/* =========================== */
+/* STATUS BADGES */
+/* =========================== */
+.badge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  margin-left: 6px;
+  font-size: 13px;
+}
+
+/* Different Status Colors */
+.badge.Submitted { background: #6b7280; }
+.badge.In-Process { background: #f59e0b; }
+.badge.Ready-for-Pickup { background: #10b981; }
+.badge.Delivered { background: #4f46e5; }
+.badge.Cancelled { background: #dc2626; }
+
+/* =========================== */
+/* STATUS DROPDOWN */
+/* =========================== */
+.status-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.status-select:hover {
+  background: white;
+  border-color: #3b82f6;
+}
+
+.status-select:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.4);
+}
+
+/* =========================== */
+/* LOADING TEXT */
+/* =========================== */
+.loading {
+  text-align: center;
+  font-size: 1.3rem;
+  margin-top: 40px;
+  font-weight: 600;
+  color: #6b7280;
+}
